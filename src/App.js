@@ -1,5 +1,4 @@
 import { Component } from "react";
-import logo from "./logo.svg";
 import "./App.css";
 
 class App extends Component {
@@ -7,29 +6,57 @@ class App extends Component {
     super();
 
     this.state = {
-      name: { firstName: "Lance", secondName: "Liu" },
-      company: "Google",
+      monsters: [],
+      searchFiled: "",
     };
+    console.log("constructor", 1);
+  }
+
+  componentDidMount() {
+    console.log("componentDidMount", 3);
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then((repsonse) => repsonse.json())
+      .then((users) =>
+        this.setState(
+          () => {
+            return { monsters: users };
+          },
+          () => {
+            console.log(this.state);
+          }
+        )
+      );
   }
 
   render() {
+    console.log("render", 2);
+
+    const filteredMonsters = this.state.monsters.filter((monster) => {
+      return monster.name.toLowerCase().includes(this.state.searchFiled);
+    });
+
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Hi {this.state.name.firstName} {this.state.name.secondName}, I want
-            to work in {this.state.company}
-          </p>
-          <button
-            onClick={() => {
-              this.setState({ name: { firstName: "Meng", secondName: "Liu" } });
-              console.log(this.state);
-            }}
-          >
-            Change Name
-          </button>
-        </header>
+        <input
+          className="seach-box"
+          type="search"
+          placeholder="search monsters"
+          onChange={(event) => {
+            console.log(event.target.value);
+            const searchString = event.target.value.toLowerCase();
+            console.log(filteredMonsters);
+            this.setState(() => {
+              return { searchFiled: searchString };
+            });
+          }}
+        />
+        {filteredMonsters.map((monster) => {
+          return (
+            <div key={monster.id}>
+              <h1>{monster.name}</h1>
+            </div>
+          );
+        })}
       </div>
     );
   }
