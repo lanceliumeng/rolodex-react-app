@@ -1,35 +1,52 @@
 import { Component } from "react";
-import logo from "./logo.svg";
 import "./App.css";
+import CardList from "./components/card-list/card-list.component";
+import SearchBox from "./components/search-box/search-box.component";
 
 class App extends Component {
   constructor() {
     super();
 
     this.state = {
-      name: { firstName: "Lance", secondName: "Liu" },
-      company: "Google",
+      monsters: [],
+      searchFiled: "",
     };
   }
 
+  componentDidMount() {
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then((repsonse) => repsonse.json())
+      .then((users) =>
+        this.setState(() => {
+          return { monsters: users };
+        })
+      );
+  }
+
+  onSearchChange = (event) => {
+    const searchString = event.target.value.toLowerCase();
+    this.setState(() => {
+      return { searchFiled: searchString };
+    });
+  };
+
   render() {
+    const { monsters, searchFiled } = this.state;
+    const { onSearchChange } = this;
+
+    const filteredMonsters = monsters.filter((monster) => {
+      return monster.name.toLowerCase().includes(searchFiled);
+    });
+
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Hi {this.state.name.firstName} {this.state.name.secondName}, I want
-            to work in {this.state.company}
-          </p>
-          <button
-            onClick={() => {
-              this.setState({ name: { firstName: "Meng", secondName: "Liu" } });
-              console.log(this.state);
-            }}
-          >
-            Change Name
-          </button>
-        </header>
+        <h1 className="app-title">Rolodex Roloing</h1>
+        <SearchBox
+          onChangeHandler={onSearchChange}
+          placeholder="search monsters"
+          className="monsters-search-box"
+        />
+        <CardList monsters={filteredMonsters} />
       </div>
     );
   }
